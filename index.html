@@ -1,25 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>해와 달</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
-:root {
-  --ink: #31394a;
-  --paper: #fffdf7;
-  --night: #172a49;
-  --day: #9bd5ef;
-  --grass: #71936d;
+* {
+  box-sizing: border-box;
 }
-
-* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -29,529 +22,517 @@ html, body {
 }
 
 body {
-  font-family: "Gowun Batang", serif;
-  color: var(--ink);
+  background: #111b32;
 }
 
-button {
-  font: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 6px;
-}
-
-/* 전체 화면 */
-.world {
-  position: fixed;
-  inset: 0;
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
   overflow: hidden;
   isolation: isolate;
+  color: #fff;
   background: linear-gradient(
-    180deg,
-    #9ed5ee 0%,
-    #d8e9e9 62%,
-    #f8dbb3 100%
+    165deg,
+    #498dc6 0%,
+    #89bedc 50%,
+    #c2dce5 76%,
+    #f4d9ae 100%
   );
 }
 
-/* 낮과 밤의 하늘 */
-.sky-day,
-.sky-night {
+/* 하늘 */
+
+.sky-night-svg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.sky-day {
+.night-remnant {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
-    180deg,
-    #83c8ed 0%,
-    #c2e4ec 57%,
-    #f5d8b2 100%
+    95deg,
+    rgba(7,16,39,.48) 0%,
+    rgba(27,48,86,.23) 15%,
+    transparent 42%
   );
+  pointer-events: none;
 }
 
-.sky-night {
-  background: linear-gradient(
-    180deg,
-    #101c39 0%,
-    #273e63 62%,
-    #68748a 100%
+.day-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 75% 85% at 102% 80%,
+    rgba(255,229,177,.47),
+    transparent 82%
   );
-  clip-path: ellipse(0% 0% at 28% 0%);
-  transition: clip-path 1.8s cubic-bezier(.65,0,.2,1);
-}
-
-/* 곡선이 아래에서 올라와 밤하늘을 펼친다 */
-.world[data-mode="moon"] .sky-night {
-  clip-path: ellipse(145% 155% at 24% 0%);
-}
-
-/* 낮으로 돌아갈 때 */
-.world[data-mode="sun"] .sky-night {
-  clip-path: ellipse(0% 0% at 28% 0%);
-}
-
-/* 기본 화면에서는 두 하늘이 섞여 보임 */
-.world[data-mode="both"] .sky-night {
-  clip-path: ellipse(77% 125% at -22% 0%);
+  pointer-events: none;
 }
 
 /* 별 */
+
 .stars {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transition: opacity 1.3s ease;
+  transition: opacity 2.4s;
 }
-
-.world[data-mode="sun"] .stars { opacity: .15; }
-.world[data-mode="moon"] .stars { opacity: 1; }
-.world[data-mode="both"] .stars { opacity: .75; }
 
 .star {
   position: absolute;
-  width: 3px;
-  height: 3px;
+  width: 2px;
+  height: 2px;
+  background: #fff9ed;
   border-radius: 50%;
-  background: #fff9e7;
-  box-shadow: 0 0 7px 2px rgba(255,255,255,.3);
+  box-shadow: 0 0 7px #fff;
   animation: twinkle 3.5s ease-in-out infinite alternate;
 }
 
 @keyframes twinkle {
-  from { opacity: .35; transform: scale(.7); }
-  to { opacity: 1; transform: scale(1.2); }
+  from { opacity: .25; }
+  to { opacity: 1; }
+}
+
+.scene.sun-active .stars {
+  opacity: .28;
+}
+
+/* 구름 */
+
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 170px 33px at 78% 43%,
+      #ffffff40,
+      transparent
+    ),
+    radial-gradient(
+      ellipse 200px 42px at 24% 63%,
+      #b5cbe42e,
+      transparent
+    );
+  filter: blur(12px);
+}
+
+/* 제목 */
+
+.heading {
+  position: absolute;
+  z-index: 6;
+  top: 9%;
+  width: 100%;
+  text-align: center;
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(25px, 4vw, 39px);
+  font-weight: 300;
+  letter-spacing: .3em;
+  text-shadow: 0 2px 15px #0b153f7a;
+  pointer-events: none;
+  transition: text-shadow 2.4s ease;
+}
+
+.heading small {
+  display: block;
+  margin-top: 13px;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: .29em;
+}
+
+/* 낮 모드: 밝은 하늘 위에서도 제목이 또렷하도록 */
+.scene.sun-active .heading {
+  text-shadow:
+    0 1px 3px rgba(16,40,82,.55),
+    0 2px 16px rgba(16,40,82,.5);
 }
 
 /* 해와 달 */
+
 .celestial {
   position: absolute;
-  z-index: 4;
+  z-index: 7;
+  top: 29%;
   display: grid;
   place-items: center;
-  padding: 0;
+  width: 112px;
+  height: 112px;
   border: 0;
-  background: none;
+  background: transparent;
   cursor: pointer;
-  transition: transform .6s ease, filter .6s ease;
+  transition: transform .4s, opacity 1.7s;
 }
 
 .celestial:hover {
-  transform: scale(1.08);
+  transform: scale(1.09);
 }
 
-.sun {
-  top: 15%;
-  right: 18%;
-  width: clamp(75px, 10vw, 125px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #ffedba;
-  box-shadow:
-    0 0 35px 14px rgba(255,227,151,.4),
-    0 0 100px 45px rgba(255,225,162,.18);
+.moon-btn {
+  left: 12%;
 }
 
-.moon {
-  top: 17%;
-  left: 18%;
-  width: clamp(70px, 9vw, 115px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  filter: drop-shadow(0 0 16px rgba(241,244,255,.45));
+.sun-btn {
+  right: 12%;
 }
 
-.moon-shape {
+.moon-icon {
+  width: 94px;
+  height: 94px;
+  overflow: visible;
+  filter: drop-shadow(0 0 12px #e6e9ff8a);
+}
+
+.sun-disc {
   position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
+  width: 79px;
+  height: 79px;
   border-radius: 50%;
-  background: #f4f1d9;
-  overflow: hidden;
+  background: radial-gradient(
+    circle at 42% 38%,
+    #fffdf0,
+    #ffe7a6 75%,
+    #ffdc93
+  );
+  box-shadow:
+    0 0 25px #ffe6a3,
+    0 0 75px #ffcf7b88;
+  animation: sunPulse 4.2s ease-in-out infinite alternate;
 }
 
-.moon-shape::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: -20%;
-  left: 38%;
-  border-radius: 50%;
-  background: #24395a;
-  transition: background 1.4s ease;
+@keyframes sunPulse {
+  from {
+    box-shadow:
+      0 0 22px #ffe6a3,
+      0 0 62px #ffcf7b77;
+  }
+  to {
+    box-shadow:
+      0 0 32px #ffeab4,
+      0 0 92px #ffcf7bb0;
+  }
 }
 
-.world[data-mode="sun"] .moon-shape::after {
-  background: #8ecbe8;
-}
-
-.world[data-mode="moon"] .moon-shape::after {
-  background: #152443;
-}
-
-/* 작은 안내 */
-.hint {
-  position: absolute;
-  z-index: 4;
-  top: 42%;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  white-space: nowrap;
-  pointer-events: none;
-  transition: opacity .5s ease;
-}
-
-.hint h1 {
-  margin: 0 0 12px;
-  font-family: "Noto Serif KR", serif;
-  font-weight: 400;
-  font-size: clamp(25px, 4vw, 43px);
-  letter-spacing: .25em;
-  color: #f9f5e8;
-  text-shadow: 0 2px 15px rgba(23,36,54,.25);
-}
-
-.hint p {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: .12em;
-  color: #fff9ee;
-  text-shadow: 0 1px 8px rgba(0,0,0,.25);
-}
-
-.world:has(.modal.open) .hint {
-  opacity: .2;
+.scene.sun-active .moon-btn,
+.scene.moon-active .sun-btn {
+  opacity: .55;
 }
 
 /* 초원 */
-.landscape {
+
+.hill {
   position: absolute;
-  z-index: 5;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 30%;
+  width: 145%;
+  border-radius: 50% 50% 0 0;
   pointer-events: none;
+  transition: background 2.6s ease;
 }
 
 .hill-back {
-  position: absolute;
-  inset: 0;
-  background: #93ad84;
-  clip-path: ellipse(78% 65% at 23% 100%);
+  z-index: 2;
+  bottom: -90px;
+  left: -35%;
+  height: 250px;
+  background: #496d64;
 }
 
 .hill-front {
+  z-index: 3;
+  bottom: -120px;
+  left: -5%;
+  height: 260px;
+  background: linear-gradient(
+    #4b705d,
+    #294b43
+  );
+}
+
+.scene.sun-active .hill-back {
+  background: #91b479;
+}
+
+.scene.sun-active .hill-front {
+  background: linear-gradient(
+    #79a96a,
+    #4f8051
+  );
+}
+
+/* 데이지 */
+
+.flowers {
   position: absolute;
+  z-index: 4;
   inset: 0;
-  background: #71946b;
-  clip-path: ellipse(85% 77% at 77% 110%);
+  pointer-events: none;
 }
 
-.grass-floor {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 35%;
-  background: #71946b;
-}
-
-/* 꽃 */
 .flower {
   position: absolute;
-  z-index: 7;
-  bottom: 8%;
-  left: 21%;
-  width: 36px;
-  height: 60px;
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
+  width: 25px;
+  height: 29px;
   transform-origin: bottom center;
   animation: sway 4s ease-in-out infinite alternate;
 }
 
-.flower::before {
-  content: "";
+.stem {
   position: absolute;
   bottom: 0;
-  left: 17px;
+  left: 12px;
   width: 2px;
-  height: 40px;
-  background: #365e3e;
-  transform: rotate(8deg);
+  height: 14px;
+  background: #4a704c;
 }
 
-.flower-head {
+.petals {
   position: absolute;
-  top: 3px;
+  top: 2px;
   left: 7px;
-  width: 23px;
-  height: 23px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
-  background: #fff8ec;
+  background: #fffaf0;
   box-shadow:
-    9px 0 #fff8ec,
-    -9px 0 #fff8ec,
-    0 9px #fff8ec,
-    0 -9px #fff8ec;
+    6px 0 #fffaf0,
+    -6px 0 #fffaf0,
+    0 6px #fffaf0,
+    0 -6px #fffaf0,
+    4px 4px #fffaf0,
+    -4px -4px #fffaf0,
+    4px -4px #fffaf0,
+    -4px 4px #fffaf0;
 }
 
-.flower-head::after {
+.petals::after {
   content: "";
   position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 13px;
-  height: 13px;
+  inset: 3px;
   border-radius: 50%;
-  background: #e7bc69;
+  background: #e8bf66;
 }
 
 @keyframes sway {
-  from { transform: rotate(-6deg); }
-  to { transform: rotate(6deg); }
+  0% { transform: rotate(-7deg); }
+  50% { transform: rotate(3deg); }
+  100% { transform: rotate(7deg); }
 }
 
-/* 벼리의 별 */
-.special-star {
+.flower:nth-child(3n) {
+  animation-duration: 5.1s;
+}
+
+.flower:nth-child(3n+1) {
+  animation-duration: 3.7s;
+}
+
+.flower:nth-child(4n) {
+  animation-direction: alternate-reverse;
+}
+
+/* 벼리의 흰색 별 */
+
+.secret-star {
   position: absolute;
-  z-index: 6;
-  top: 10%;
-  left: 39%;
+  z-index: 5;
+  left: calc(12% + 112px);
+  top: 25%;
+  width: 34px;
+  height: 34px;
   border: 0;
-  padding: 8px;
   background: none;
-  color: #fff8dc;
-  font-size: 31px;
+  color: #ffffff;
   cursor: pointer;
-  text-shadow: 0 0 15px #fff4c0;
-  animation: specialGlow 2.8s ease-in-out infinite alternate;
-  transition: opacity .8s ease;
+  font: 29px Georgia, serif;
+  text-shadow:
+    0 0 8px rgba(255,255,255,.9),
+    0 0 22px rgba(255,255,255,.55);
+  animation: starPulse 3.8s ease-in-out infinite alternate;
 }
 
-.world[data-mode="sun"] .special-star {
-  opacity: .12;
+@keyframes starPulse {
+  from {
+    opacity: .55;
+    transform: scale(.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
-@keyframes specialGlow {
-  from { transform: scale(.85); opacity: .55; }
-  to { transform: scale(1.15); opacity: 1; }
+/* 숨겨진 제작자 코멘트 */
+
+.flower.secret-flower {
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
 }
 
-/* 프로필 팝업 */
+.flower.secret-flower:focus-visible,
+.secret-star:focus-visible,
+.celestial:focus-visible {
+  outline: 2px solid #fff8d5;
+  outline-offset: 5px;
+}
+
+/* 프로필 팝업 (닫힐 때는 딜레이 없이, 열릴 때만 페이드) */
+
 .modal-layer {
-  position: fixed;
+  position: absolute;
   z-index: 20;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(12,22,38,.25);
+  padding: 22px;
+  background: rgba(10,18,36,.42);
+  backdrop-filter: blur(5px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .35s ease, visibility .35s;
+  transition: none;
 }
 
 .modal-layer.open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transition:
+    opacity .85s ease,
+    visibility .85s ease;
 }
 
-.modal {
-  position: relative;
-  width: min(540px, 100%);
-  max-height: min(78vh, 760px);
+.profile {
+  width: min(370px, 100%);
+  max-height: min(65svh, 540px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.65);
-  border-radius: 17px;
-  background: rgba(255,253,248,.94);
-  box-shadow: 0 22px 75px rgba(13,25,42,.23);
-  backdrop-filter: blur(15px);
-  transform: translateY(20px) scale(.98);
-  transition: transform .4s ease;
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 16px;
+  background: rgba(241,244,252,.92);
+  box-shadow: 0 18px 65px rgba(5,12,33,.3);
+  color: #39435c;
+  transform: translateY(24px) scale(.975);
 }
 
-.modal-layer.open .modal {
+.modal-layer.open .profile {
   transform: translateY(0) scale(1);
+  transition: transform .85s cubic-bezier(.2,.7,.2,1);
 }
 
-.modal[data-person="moon"] {
-  background: rgba(242,244,249,.95);
+.profile.sun-theme {
+  background: rgba(255,251,241,.93);
+  color: #5c5044;
 }
 
-.modal[data-person="sun"] {
-  background: rgba(255,252,242,.95);
-}
-
-.modal-header {
-  flex: 0 0 auto;
+.profile-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 17px 24px;
-  border-bottom: 1px solid rgba(45,50,60,.1);
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(105,113,135,.19);
+  font: 12px Georgia, serif;
+  letter-spacing: .22em;
 }
 
-.modal-heading {
-  font-family: "Noto Serif KR", serif;
-  font-size: 14px;
-  letter-spacing: .12em;
-}
-
-.close {
+.close-modal {
   border: 0;
   background: none;
-  color: #667080;
-  font-size: 24px;
-  line-height: 1;
+  color: inherit;
+  font: 26px Georgia, serif;
   cursor: pointer;
+  padding: 0 4px;
 }
 
-.modal-scroll {
-  min-height: 0;
+.profile-body {
+  padding: 22px 24px 27px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 30px 32px 45px;
-  scrollbar-width: thin;
-  scrollbar-color: #b6bdc8 transparent;
-}
-
-.profile-top {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  margin-bottom: 30px;
-}
-
-.portrait {
-  width: 112px;
-  height: 138px;
-  flex: 0 0 auto;
-  border-radius: 8px;
-  background: linear-gradient(140deg,#aab8cb,#e2e4e8);
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  color: #697486;
-}
-
-/* 나중에 이미지 넣을 자리 */
-.modal[data-person="sun"] .portrait {
-  background: linear-gradient(140deg,#e6c49b,#f5e7c9);
-}
-
-.profile-name {
-  margin: 0 0 8px;
-  font-family: "Noto Serif KR", serif;
-  font-size: 27px;
-  font-weight: 500;
-}
-
-.profile-sub {
-  font-size: 12px;
-  color: #81858e;
-  letter-spacing: .07em;
-}
-
-.profile-section {
-  margin-top: 28px;
-}
-
-.profile-section h3 {
-  margin: 0 0 15px;
+  font-family: 'Noto Serif KR', serif;
   font-size: 14px;
-  font-weight: 700;
-  letter-spacing: .07em;
-}
-
-.profile-section p {
-  font-size: 13px;
+  font-weight: 400;
   line-height: 2.1;
-  margin: 0 0 12px;
-  color: #4b5360;
 }
 
-.info-row {
-  display: grid;
-  grid-template-columns: 68px 1fr;
-  gap: 15px;
-  margin: 10px 0;
-  font-size: 13px;
-  line-height: 1.8;
+.profile-body h2 {
+  font-size: 27px;
+  font-weight: 300;
+  margin: 0 0 20px;
 }
 
-.info-label { color: #9297a0; }
-
-.profile-divider {
-  height: 1px;
-  margin: 32px 0;
-  background: rgba(65,70,80,.13);
+.profile-body p {
+  margin: 0 0 16px;
 }
 
-.monologue {
-  white-space: pre-line;
-  line-height: 2.35 !important;
+.profile-body hr {
+  border: 0;
+  border-top: 1px solid rgba(105,113,135,.2);
+  margin: 24px 0;
 }
 
-.monologue-end {
-  margin-top: 35px !important;
-  font-size: 15px !important;
-  text-align: center;
-  font-family: "Noto Serif KR", serif;
-}
+/* 모바일 */
 
 @media (max-width: 600px) {
-  .sun {
-    top: 18%;
-    right: 12%;
+  .heading {
+    top: 12%;
+  }
+
+  .celestial {
+    top: 33%;
+    width: 85px;
+    height: 85px;
+  }
+
+  .moon-btn {
+    left: 5%;
+  }
+
+  .sun-btn {
+    right: 5%;
+  }
+
+  .moon-icon {
     width: 75px;
+    height: 75px;
   }
 
-  .moon {
-    top: 19%;
-    left: 12%;
-    width: 70px;
+  .sun-disc {
+    width: 62px;
+    height: 62px;
   }
 
-  .hint { top: 43%; }
-
-  .landscape { height: 26%; }
-
-  .modal-layer { padding: 17px; }
-
-  .modal { max-height: 85dvh; }
-
-  .modal-header { padding: 15px 19px; }
-
-  .modal-scroll { padding: 23px 22px 35px; }
-
-  .portrait {
-    width: 95px;
-    height: 119px;
+  .secret-star {
+    left: calc(5% + 80px);
+    top: 27%;
   }
 
-  .profile-top { gap: 17px; }
+  .hill-back {
+    height: 180px;
+    bottom: -65px;
+  }
 
-  .profile-name { font-size: 24px; }
+  .hill-front {
+    height: 200px;
+    bottom: -95px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
     transition-duration: .01ms !important;
   }
 }
@@ -560,260 +541,511 @@ button:focus-visible {
 
 <body>
 
-<main class="world" id="world" data-mode="both">
-  <div class="sky-day"></div>
-  <div class="sky-night"></div>
+<main class="scene moon-active" id="scene">
+
+  <!-- 곡선형 밤하늘 -->
+
+  <svg
+    class="sky-night-svg"
+    viewBox="0 0 1000 700"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient
+        id="nightColors"
+        x1="0" y1="0"
+        x2=".15" y2="1"
+      >
+        <stop offset="0%" stop-color="#071027"/>
+        <stop offset="58%" stop-color="#1b3056"/>
+        <stop offset="100%" stop-color="#606a88"/>
+      </linearGradient>
+
+      <filter
+        id="softEdge"
+        x="-60%" y="-60%"
+        width="220%" height="220%"
+        color-interpolation-filters="sRGB"
+      >
+        <feGaussianBlur stdDeviation="72"/>
+      </filter>
+
+      <mask
+        id="nightMask"
+        maskUnits="userSpaceOnUse"
+        x="0" y="0"
+        width="1000" height="700"
+        maskContentUnits="userSpaceOnUse"
+      >
+        <path
+          id="nightCurve"
+          fill="white"
+          filter="url(#softEdge)"
+          d="M -300 -300 L 840 -300 L 840 0 C 900 240 1090 420 1320 700 L -300 1000 Z"
+        />
+      </mask>
+    </defs>
+
+    <rect
+      x="0" y="0"
+      width="1000" height="700"
+      fill="url(#nightColors)"
+      mask="url(#nightMask)"
+    />
+  </svg>
+
+  <div class="night-remnant"></div>
+  <div class="day-glow"></div>
 
   <div class="stars" id="stars"></div>
+  <div class="clouds"></div>
 
-  <button class="celestial moon" id="moonBtn"
-          aria-label="달빛 프로필 열기">
-    <span class="moon-shape"></span>
-  </button>
+  <!-- 제목 -->
 
-  <button class="celestial sun" id="sunBtn"
-          aria-label="햇살 프로필 열기"></button>
-
-  <div class="hint">
-    <h1>해와 달</h1>
-    <p>하늘을 선택해 주세요.</p>
+  <div class="heading">
+    해와 달
+    <small>THE SUN AND THE MOON</small>
   </div>
 
-  <button class="special-star" id="starBtn"
-          aria-label="벼리 이야기 열기">✦</button>
+  <!-- SVG 달 -->
 
-  <div class="landscape" aria-hidden="true">
-    <div class="hill-back"></div>
-    <div class="hill-front"></div>
-    <div class="grass-floor"></div>
+  <button
+    class="celestial moon-btn"
+    id="moon"
+    type="button"
+    aria-label="달빛 선택"
+    aria-pressed="true"
+  >
+    <svg
+      class="moon-icon"
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient
+          id="moonFill"
+          x1="0" y1="0"
+          x2="1" y2="1"
+        >
+          <stop stop-color="#fffdf7"/>
+          <stop offset="1" stop-color="#dce6ff"/>
+        </linearGradient>
+      </defs>
+
+      <path
+        d="M65 10C44 15 29 33 29 55c0 21 16 37 36 39C32 100 8 79 8 51 8 25 30 6 55 6c4 0 7 1 10 4Z"
+        fill="url(#moonFill)"
+      />
+    </svg>
+  </button>
+
+  <!-- 해 -->
+
+  <button
+    class="celestial sun-btn"
+    id="sun"
+    type="button"
+    aria-label="햇살 선택"
+    aria-pressed="false"
+  >
+    <span class="sun-disc"></span>
+  </button>
+
+  <!-- 초원 -->
+
+  <div class="hill hill-back"></div>
+  <div class="hill hill-front" id="hillFront"></div>
+
+  <!-- 데이지 -->
+
+  <div class="flowers" id="flowers"></div>
+
+  <!-- 벼리의 흰색 별 -->
+
+  <button
+    type="button"
+    class="secret-star"
+    id="catStar"
+    aria-label="벼리 이야기 열기"
+    title="반짝이는 별"
+  >✦</button>
+
+  <!-- 팝업 -->
+
+  <div
+    class="modal-layer"
+    id="modalLayer"
+    aria-hidden="true"
+  >
+    <section
+      class="profile"
+      id="profile"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profileLabel"
+      tabindex="-1"
+    >
+      <div class="profile-head">
+        <span id="profileLabel"></span>
+
+        <button
+          type="button"
+          class="close-modal"
+          id="closeModal"
+          aria-label="프로필 닫기"
+        >×</button>
+      </div>
+
+      <div class="profile-body" id="profileBody">
+        <h2 id="profileName"></h2>
+      </div>
+    </section>
   </div>
 
-  <button class="flower" id="flowerBtn"
-          aria-label="숨겨진 제작자 이야기 열기">
-    <span class="flower-head"></span>
-  </button>
 </main>
 
-<!-- 공통 팝업 -->
-<div class="modal-layer" id="modalLayer">
-  <section class="modal" id="modal"
-           role="dialog"
-           aria-modal="true"
-           aria-labelledby="modalTitle">
-    <div class="modal-header">
-      <span class="modal-heading" id="modalTitle">PROFILE</span>
-      <button class="close" id="closeBtn"
-              aria-label="닫기">×</button>
-    </div>
-    <div class="modal-scroll" id="modalContent"></div>
-  </section>
-</div>
-
 <script>
-const world = document.getElementById("world");
-const stars = document.getElementById("stars");
-const layer = document.getElementById("modalLayer");
-const modal = document.getElementById("modal");
-const content = document.getElementById("modalContent");
-const modalTitle = document.getElementById("modalTitle");
-const closeBtn = document.getElementById("closeBtn");
+(() => {
 
-let previousFocus = null;
+  const scene = document.getElementById('scene');
+  const curve = document.getElementById('nightCurve');
+  const stars = document.getElementById('stars');
+  const flowers = document.getElementById('flowers');
+  const hillFront = document.getElementById('hillFront');
 
-/* 작은 별 생성 */
-const starPositions = [
-  [5,8],[12,26],[19,9],[25,36],[32,12],
-  [38,31],[45,7],[51,24],[58,12],[65,34],
-  [72,8],[79,26],[87,11],[94,36],
-  [9,48],[21,58],[35,51],[49,45],
-  [61,58],[75,48],[89,59],[17,73],
-  [42,69],[68,72],[92,75]
-];
+  /* 별 배치 */
 
-starPositions.forEach(([x,y], i) => {
-  const star = document.createElement("span");
-  star.className = "star";
-  star.style.left = x + "%";
-  star.style.top = y + "%";
-  star.style.animationDelay = (i % 7) * .45 + "s";
-  stars.appendChild(star);
-});
+  const starPositions = [
+    [15,20], [35,35], [65,15], [83,45],
+    [51,60], [8,42], [27,12], [73,33],
+    [90,17], [44,48], [57,27], [12,61],
+    [82,66]
+  ];
 
-/* 임시 프로필 데이터 */
-const profiles = {
-  moon: {
-    title: "☾ 달빛",
-    name: "달빛",
-    sub: "THE MOON",
-    age: "30세",
-    job: "변호사",
-    hobby: "춤추기",
-    description: "오랜 시간 곁에 있었지만, 아직 보여주지 못한 모습이 많다.",
-    story: `여기에 달빛의 자세한 프로필과 이야기가 들어갈 예정입니다.
+  starPositions.forEach(([x,y],i) => {
+    const star = document.createElement('i');
 
-하늘과 처음 만났던 시절.
-오랫동안 친구라는 이름으로 곁에 남았던 시간.
-그리고 말하지 못한 마음.
+    star.className = 'star';
+    star.style.left = x + '%';
+    star.style.top = y + '%';
+    star.style.animationDelay = i * .26 + 's';
 
-우리가 함께 정리한 캐릭터 설정을 이곳에 넣으면 됩니다.`,
-    ending: "내가 너를 사랑해도 되는 걸까."
-  },
+    stars.append(star);
+  });
 
-  sun: {
-    title: "☼ 햇살",
-    name: "햇살",
-    sub: "THE SUN",
-    age: "30세",
-    job: "추후 입력",
-    hobby: "사진 찍기",
-    description: "함께한 시간을 사진으로 남기는 것을 좋아한다.",
-    story: `여기에 햇살의 자세한 프로필과 이야기가 들어갈 예정입니다.
+  /* 데이지 배치 (x%, 깊이 단계, 크기) */
 
-하늘과 함께 보낸 학창 시절.
-연인이 되고, 약혼하기까지 쌓아온 일상.
-그리고 지금껏 알지 못했던 자신의 마음.
+  const flowerPositions = [
+    [12,11,.85],
+    [27,7,.65],
+    [66,10,.85],
+    [84,5,.7],
+    [48,4,.6],
+    [73,3,.55],
+    [19,2,.55],
+    [88,9,.7],
+    [37,12,.75],
+    [60,6,.68]
+  ];
 
-햇살의 독백과 상세 설정을 이곳에 넣으면 됩니다.`,
-    ending: "사랑해도 돼?"
-  }
-};
+  const flowerEls = [];
 
-function escapeHTML(str) {
-  return String(str).replace(/[&<>"']/g, ch => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[ch]);
-}
+  flowerPositions.forEach(([x,y,z],i) => {
+    const isSecret = i === 3;
 
-function profileHTML(p) {
-  return `
-    <div class="profile-top">
-      <div class="portrait">이미지 영역</div>
-      <div>
-        <h2 class="profile-name">${escapeHTML(p.name)}</h2>
-        <div class="profile-sub">${escapeHTML(p.sub)}</div>
-      </div>
-    </div>
+    const flower = document.createElement(
+      isSecret ? 'button' : 'div'
+    );
 
-    <div class="profile-section">
-      <h3>기본 정보</h3>
-      <div class="info-row">
-        <span class="info-label">나이</span>
-        <span>${escapeHTML(p.age)}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">직업</span>
-        <span>${escapeHTML(p.job)}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">취미</span>
-        <span>${escapeHTML(p.hobby)}</span>
-      </div>
-    </div>
+    flower.className =
+      'flower' + (isSecret ? ' secret-flower' : '');
 
-    <div class="profile-section">
-      <h3>소개</h3>
-      <p>${escapeHTML(p.description)}</p>
-    </div>
+    if (isSecret) {
+      flower.type = 'button';
+      flower.setAttribute(
+        'aria-label',
+        '제작자 코멘트 열기'
+      );
+      flower.title = '작은 데이지';
 
-    <div class="profile-divider"></div>
+      flower.addEventListener('click', () => {
+        openProfile('creator');
+      });
+    }
 
-    <div class="profile-section">
-      <h3>그의 이야기</h3>
-      <p class="monologue">${escapeHTML(p.story)}</p>
-      <p class="monologue-end">${escapeHTML(p.ending)}</p>
-    </div>
-  `;
-}
+    flower.style.left = x + '%';
+    flower.style.scale = z;
+    flower.style.animationDelay = i * .42 + 's';
 
-function openModal(type) {
-  previousFocus = document.activeElement;
+    flower.innerHTML =
+      '<span class="stem"></span>' +
+      '<span class="petals"></span>';
 
-  if (type === "moon" || type === "sun") {
-    world.dataset.mode = type;
-    const p = profiles[type];
-    modal.dataset.person = type;
-    modalTitle.textContent = p.title + " · PROFILE";
-    content.innerHTML = profileHTML(p);
-  } else if (type === "cat") {
-    modal.dataset.person = "moon";
-    modalTitle.textContent = "✦ 벼리";
-    content.innerHTML = `
-      <div class="profile-section">
-        <h3>벼리</h3>
-        <p>달빛과 함께 사는 고양이.</p>
-        <p>이곳에는 벼리의 사진과 이야기가 들어갈 예정입니다.</p>
-      </div>
-    `;
-  } else if (type === "creator") {
-    modal.dataset.person = "sun";
-    modalTitle.textContent = "✿ 제작자 이야기";
-    content.innerHTML = `
-      <div class="profile-section">
-        <h3>작은 꽃을 발견하셨네요!</h3>
-        <p>이곳에는 제작자의 코멘트와 숨겨진 이야기가 들어갈 예정입니다.</p>
-      </div>
-    `;
+    flowers.append(flower);
+    flowerEls.push({ el: flower, x, y });
+  });
+
+  /* 데이지를 언덕 곡선 위에 정확히 앉히기 (화면 비율이 바뀌어도 유지) */
+
+  function layoutFlowers() {
+    const sceneRect = scene.getBoundingClientRect();
+    const hill = hillFront.getBoundingClientRect();
+
+    const cx = hill.left + hill.width / 2;
+    const rx = hill.width / 2;
+    const ry = hill.height / 2;
+
+    flowerEls.forEach(({ el, x, y }) => {
+      const px = sceneRect.left + sceneRect.width * x / 100 + 12;
+      const dx = Math.max(-1, Math.min(1, (px - cx) / rx));
+
+      const surfaceTop =
+        hill.top + ry * (1 - Math.sqrt(1 - dx * dx));
+
+      // y가 작을수록 언덕 안쪽(앞쪽)에 깊게 심는다
+      const depth = 12 + (12 - y) * 5;
+
+      el.style.bottom =
+        (sceneRect.bottom - surfaceTop - depth) + 'px';
+    });
   }
 
-  content.scrollTop = 0;
-  layer.classList.add("open");
-  closeBtn.focus();
-}
+  layoutFlowers();
+  addEventListener('resize', layoutFlowers);
 
-function closeModal() {
-  layer.classList.remove("open");
-  previousFocus?.focus();
-}
+  /* 하늘 전환 애니메이션 */
 
-document.getElementById("moonBtn")
-  .addEventListener("click", () => openModal("moon"));
+  const endpoints = {
+    sun: {
+      top: 145,
+      bottom: 390
+    },
+    moon: {
+      top: 900,
+      bottom: 1370
+    }
+  };
 
-document.getElementById("sunBtn")
-  .addEventListener("click", () => openModal("sun"));
+  let current = { ...endpoints.moon };
+  let frame = 0;
 
-document.getElementById("starBtn")
-  .addEventListener("click", () => openModal("cat"));
+  function draw(v) {
+    const t = v.top;
+    const b = v.bottom;
 
-document.getElementById("flowerBtn")
-  .addEventListener("click", () => openModal("creator"));
-
-closeBtn.addEventListener("click", closeModal);
-
-layer.addEventListener("click", e => {
-  if (e.target === layer) closeModal();
-});
-
-document.addEventListener("keydown", e => {
-  if (!layer.classList.contains("open")) return;
-
-  if (e.key === "Escape") {
-    closeModal();
-    return;
+    curve.setAttribute(
+      'd',
+      `M -350 -350
+       L ${t} -350
+       L ${t} 0
+       C ${t+10} 235 ${b-220} 445 ${b} 700
+       L -350 1050 Z`
+    );
   }
 
-  if (e.key === "Tab") {
-    const focusable = [...modal.querySelectorAll(
-      'button, a[href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
-    )].filter(el => !el.disabled);
+  draw(current);
 
-    if (!focusable.length) return;
+  function choose(type) {
+    const target = endpoints[type];
 
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
+    scene.classList.toggle(
+      'sun-active',
+      type === 'sun'
+    );
 
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
+    scene.classList.toggle(
+      'moon-active',
+      type === 'moon'
+    );
+
+    document.getElementById('sun').setAttribute(
+      'aria-pressed',
+      String(type === 'sun')
+    );
+
+    document.getElementById('moon').setAttribute(
+      'aria-pressed',
+      String(type === 'moon')
+    );
+
+    cancelAnimationFrame(frame);
+
+    const start = { ...current };
+    const startTime = performance.now();
+    const duration = 2900;
+
+    function step(now) {
+      const p = Math.min(
+        1,
+        (now - startTime) / duration
+      );
+
+      const e = p < .5
+        ? 4 * p * p * p
+        : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+      current = {
+        top: start.top + (target.top - start.top) * e,
+        bottom: start.bottom + (target.bottom - start.bottom) * e
+      };
+
+      draw(current);
+
+      if (p < 1) {
+        frame = requestAnimationFrame(step);
+      }
+    }
+
+    if (matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches) {
+      current = { ...target };
+      draw(current);
+    } else {
+      frame = requestAnimationFrame(step);
     }
   }
-});
+
+  /* 프로필 팝업 */
+
+  const modal = document.getElementById('modalLayer');
+  const profile = document.getElementById('profile');
+  const body = document.getElementById('profileBody');
+  const closeButton = document.getElementById('closeModal');
+
+  let previousFocus = null;
+
+  function openProfile(type) {
+    previousFocus = document.activeElement;
+
+    if (type === 'moon' || type === 'sun') {
+      choose(type);
+    }
+
+    const isMoon = type === 'moon';
+
+    const labels = {
+      moon: '소꿉친구',
+      sun: '약혼자',
+      cat: '집고양이',
+      creator: '제작자 코멘트'
+    };
+
+    document.getElementById('profileLabel').textContent =
+      labels[type];
+
+    profile.classList.toggle(
+      'sun-theme',
+      type === 'sun' || type === 'creator'
+    );
+
+    if (type === 'cat') {
+
+      body.innerHTML = `
+        <h2 id="profileName">✦ 벼리</h2>
+        <p>달빛과 함께 사는 고양이.</p>
+        <hr>
+        <p>벼리의 사진과 이야기가 들어갈 자리입니다.</p>
+      `;
+
+    } else if (type === 'creator') {
+
+      body.innerHTML = `
+        <p>작은 데이지를 발견하셨네요.</p>
+        <hr>
+        <p>제작 비하인드와 소소한 이야기가 들어갈 자리입니다.</p>
+      `;
+
+    } else if (isMoon) {
+
+      body.innerHTML = `
+        <h2 id="profileName">달빛</h2>
+        <p>오랫동안 하늘의 곁에 머물렀던 사람.</p>
+        <hr>
+        <p>나이　30세</p>
+        <p>직업　변호사</p>
+        <p>취미　춤</p>
+        <hr>
+        <p>상세 프로필이 들어갈 자리입니다.</p>
+        <hr>
+        <p>내가 너를 사랑해도 되는 걸까.</p>
+      `;
+
+    } else {
+
+      body.innerHTML = `
+        <h2 id="profileName">햇살</h2>
+        <p>하늘과 함께한 시간을 사진으로 남기는 사람.</p>
+        <hr>
+        <p>나이　30세</p>
+        <p>취미　사진</p>
+        <hr>
+        <p>상세 프로필이 들어갈 자리입니다.</p>
+        <hr>
+        <p>사랑해도 돼?</p>
+      `;
+    }
+
+    body.scrollTop = 0;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    closeButton.focus();
+  }
+
+  function closeProfile() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+
+    if (previousFocus && previousFocus.focus) {
+      previousFocus.focus();
+    }
+  }
+
+  /* 클릭 이벤트 */
+
+  document.getElementById('moon')
+    .addEventListener('click', () => {
+      openProfile('moon');
+    });
+
+  document.getElementById('sun')
+    .addEventListener('click', () => {
+      openProfile('sun');
+    });
+
+  document.getElementById('catStar')
+    .addEventListener('click', () => {
+      openProfile('cat');
+    });
+
+  closeButton.addEventListener('click', closeProfile);
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      closeProfile();
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('open')) return;
+
+    if (e.key === 'Escape') {
+      closeProfile();
+    }
+
+    if (e.key === 'Tab') {
+      if (document.activeElement !== closeButton) {
+        e.preventDefault();
+        closeButton.focus();
+      }
+    }
+  });
+
+})();
 </script>
+
 </body>
 </html>
