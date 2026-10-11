@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해와 달</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --ink: #31394a;
+  --paper: #fffdf7;
+  --night: #172a49;
+  --day: #9bd5ef;
+  --grass: #71936d;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Gowun Batang", serif;
+  color: var(--ink);
+}
+
+button {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 6px;
+}
+
+/* 전체 화면 */
+.world {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(
+    180deg,
+    #9ed5ee 0%,
+    #d8e9e9 62%,
+    #f8dbb3 100%
+  );
+}
+
+/* 낮과 밤의 하늘 */
+.sky-day,
+.sky-night {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky-day {
+  background: linear-gradient(
+    180deg,
+    #83c8ed 0%,
+    #c2e4ec 57%,
+    #f5d8b2 100%
+  );
+}
+
+.sky-night {
+  background: linear-gradient(
+    180deg,
+    #101c39 0%,
+    #273e63 62%,
+    #68748a 100%
+  );
+  clip-path: ellipse(0% 0% at 28% 0%);
+  transition: clip-path 1.8s cubic-bezier(.65,0,.2,1);
+}
+
+/* 곡선이 아래에서 올라와 밤하늘을 펼친다 */
+.world[data-mode="moon"] .sky-night {
+  clip-path: ellipse(145% 155% at 24% 0%);
+}
+
+/* 낮으로 돌아갈 때 */
+.world[data-mode="sun"] .sky-night {
+  clip-path: ellipse(0% 0% at 28% 0%);
+}
+
+/* 기본 화면에서는 두 하늘이 섞여 보임 */
+.world[data-mode="both"] .sky-night {
+  clip-path: ellipse(77% 125% at -22% 0%);
+}
+
+/* 별 */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 1.3s ease;
+}
+
+.world[data-mode="sun"] .stars { opacity: .15; }
+.world[data-mode="moon"] .stars { opacity: 1; }
+.world[data-mode="both"] .stars { opacity: .75; }
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff9e7;
+  box-shadow: 0 0 7px 2px rgba(255,255,255,.3);
+  animation: twinkle 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { opacity: .35; transform: scale(.7); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+/* 해와 달 */
+.celestial {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform .6s ease, filter .6s ease;
+}
+
+.celestial:hover {
+  transform: scale(1.08);
+}
+
+.sun {
+  top: 15%;
+  right: 18%;
+  width: clamp(75px, 10vw, 125px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #ffedba;
+  box-shadow:
+    0 0 35px 14px rgba(255,227,151,.4),
+    0 0 100px 45px rgba(255,225,162,.18);
+}
+
+.moon {
+  top: 17%;
+  left: 18%;
+  width: clamp(70px, 9vw, 115px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 16px rgba(241,244,255,.45));
+}
+
+.moon-shape {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #f4f1d9;
+  overflow: hidden;
+}
+
+.moon-shape::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: -20%;
+  left: 38%;
+  border-radius: 50%;
+  background: #24395a;
+  transition: background 1.4s ease;
+}
+
+.world[data-mode="sun"] .moon-shape::after {
+  background: #8ecbe8;
+}
+
+.world[data-mode="moon"] .moon-shape::after {
+  background: #152443;
+}
+
+/* 작은 안내 */
+.hint {
+  position: absolute;
+  z-index: 4;
+  top: 42%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity .5s ease;
+}
+
+.hint h1 {
+  margin: 0 0 12px;
+  font-family: "Noto Serif KR", serif;
+  font-weight: 400;
+  font-size: clamp(25px, 4vw, 43px);
+  letter-spacing: .25em;
+  color: #f9f5e8;
+  text-shadow: 0 2px 15px rgba(23,36,54,.25);
+}
+
+.hint p {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: #fff9ee;
+  text-shadow: 0 1px 8px rgba(0,0,0,.25);
+}
+
+.world:has(.modal.open) .hint {
+  opacity: .2;
+}
+
+/* 초원 */
+.landscape {
+  position: absolute;
+  z-index: 5;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  pointer-events: none;
+}
+
+.hill-back {
+  position: absolute;
+  inset: 0;
+  background: #93ad84;
+  clip-path: ellipse(78% 65% at 23% 100%);
+}
+
+.hill-front {
+  position: absolute;
+  inset: 0;
+  background: #71946b;
+  clip-path: ellipse(85% 77% at 77% 110%);
+}
+
+.grass-floor {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 35%;
+  background: #71946b;
+}
+
+/* 꽃 */
+.flower {
+  position: absolute;
+  z-index: 7;
+  bottom: 8%;
+  left: 21%;
+  width: 36px;
+  height: 60px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transform-origin: bottom center;
+  animation: sway 4s ease-in-out infinite alternate;
+}
+
+.flower::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 17px;
+  width: 2px;
+  height: 40px;
+  background: #365e3e;
+  transform: rotate(8deg);
+}
+
+.flower-head {
+  position: absolute;
+  top: 3px;
+  left: 7px;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #fff8ec;
+  box-shadow:
+    9px 0 #fff8ec,
+    -9px 0 #fff8ec,
+    0 9px #fff8ec,
+    0 -9px #fff8ec;
+}
+
+.flower-head::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e7bc69;
+}
+
+@keyframes sway {
+  from { transform: rotate(-6deg); }
+  to { transform: rotate(6deg); }
+}
+
+/* 벼리의 별 */
+.special-star {
+  position: absolute;
+  z-index: 6;
+  top: 10%;
+  left: 39%;
+  border: 0;
+  padding: 8px;
+  background: none;
+  color: #fff8dc;
+  font-size: 31px;
+  cursor: pointer;
+  text-shadow: 0 0 15px #fff4c0;
+  animation: specialGlow 2.8s ease-in-out infinite alternate;
+  transition: opacity .8s ease;
+}
+
+.world[data-mode="sun"] .special-star {
+  opacity: .12;
+}
+
+@keyframes specialGlow {
+  from { transform: scale(.85); opacity: .55; }
+  to { transform: scale(1.15); opacity: 1; }
+}
+
+/* 프로필 팝업 */
+.modal-layer {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(12,22,38,.25);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .35s ease, visibility .35s;
+}
+
+.modal-layer.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal {
+  position: relative;
+  width: min(540px, 100%);
+  max-height: min(78vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 17px;
+  background: rgba(255,253,248,.94);
+  box-shadow: 0 22px 75px rgba(13,25,42,.23);
+  backdrop-filter: blur(15px);
+  transform: translateY(20px) scale(.98);
+  transition: transform .4s ease;
+}
+
+.modal-layer.open .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal[data-person="moon"] {
+  background: rgba(242,244,249,.95);
+}
+
+.modal[data-person="sun"] {
+  background: rgba(255,252,242,.95);
+}
+
+.modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 24px;
+  border-bottom: 1px solid rgba(45,50,60,.1);
+}
+
+.modal-heading {
+  font-family: "Noto Serif KR", serif;
+  font-size: 14px;
+  letter-spacing: .12em;
+}
+
+.close {
+  border: 0;
+  background: none;
+  color: #667080;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 30px 32px 45px;
+  scrollbar-width: thin;
+  scrollbar-color: #b6bdc8 transparent;
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 30px;
+}
+
+.portrait {
+  width: 112px;
+  height: 138px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: linear-gradient(140deg,#aab8cb,#e2e4e8);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #697486;
+}
+
+/* 나중에 이미지 넣을 자리 */
+.modal[data-person="sun"] .portrait {
+  background: linear-gradient(140deg,#e6c49b,#f5e7c9);
+}
+
+.profile-name {
+  margin: 0 0 8px;
+  font-family: "Noto Serif KR", serif;
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.profile-sub {
+  font-size: 12px;
+  color: #81858e;
+  letter-spacing: .07em;
+}
+
+.profile-section {
+  margin-top: 28px;
+}
+
+.profile-section h3 {
+  margin: 0 0 15px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .07em;
+}
+
+.profile-section p {
+  font-size: 13px;
+  line-height: 2.1;
+  margin: 0 0 12px;
+  color: #4b5360;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 15px;
+  margin: 10px 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.info-label { color: #9297a0; }
+
+.profile-divider {
+  height: 1px;
+  margin: 32px 0;
+  background: rgba(65,70,80,.13);
+}
+
+.monologue {
+  white-space: pre-line;
+  line-height: 2.35 !important;
+}
+
+.monologue-end {
+  margin-top: 35px !important;
+  font-size: 15px !important;
+  text-align: center;
+  font-family: "Noto Serif KR", serif;
+}
+
+@media (max-width: 600px) {
+  .sun {
+    top: 18%;
+    right: 12%;
+    width: 75px;
+  }
+
+  .moon {
+    top: 19%;
+    left: 12%;
+    width: 70px;
+  }
+
+  .hint { top: 43%; }
+
+  .landscape { height: 26%; }
+
+  .modal-layer { padding: 17px; }
+
+  .modal { max-height: 85dvh; }
+
+  .modal-header { padding: 15px 19px; }
+
+  .modal-scroll { padding: 23px 22px 35px; }
+
+  .portrait {
+    width: 95px;
+    height: 119px;
+  }
+
+  .profile-top { gap: 17px; }
+
+  .profile-name { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="world" id="world" data-mode="both">
+  <div class="sky-day"></div>
+  <div class="sky-night"></div>
+
+  <div class="stars" id="stars"></div>
+
+  <button class="celestial moon" id="moonBtn"
+          aria-label="달빛 프로필 열기">
+    <span class="moon-shape"></span>
+  </button>
+
+  <button class="celestial sun" id="sunBtn"
+          aria-label="햇살 프로필 열기"></button>
+
+  <div class="hint">
+    <h1>해와 달</h1>
+    <p>하늘을 선택해 주세요.</p>
+  </div>
+
+  <button class="special-star" id="starBtn"
+          aria-label="벼리 이야기 열기">✦</button>
+
+  <div class="landscape" aria-hidden="true">
+    <div class="hill-back"></div>
+    <div class="hill-front"></div>
+    <div class="grass-floor"></div>
+  </div>
+
+  <button class="flower" id="flowerBtn"
+          aria-label="숨겨진 제작자 이야기 열기">
+    <span class="flower-head"></span>
+  </button>
+</main>
+
+<!-- 공통 팝업 -->
+<div class="modal-layer" id="modalLayer">
+  <section class="modal" id="modal"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <span class="modal-heading" id="modalTitle">PROFILE</span>
+      <button class="close" id="closeBtn"
+              aria-label="닫기">×</button>
+    </div>
+    <div class="modal-scroll" id="modalContent"></div>
+  </section>
+</div>
+
+<script>
+const world = document.getElementById("world");
+const stars = document.getElementById("stars");
+const layer = document.getElementById("modalLayer");
+const modal = document.getElementById("modal");
+const content = document.getElementById("modalContent");
+const modalTitle = document.getElementById("modalTitle");
+const closeBtn = document.getElementById("closeBtn");
+
+let previousFocus = null;
+
+/* 작은 별 생성 */
+const starPositions = [
+  [5,8],[12,26],[19,9],[25,36],[32,12],
+  [38,31],[45,7],[51,24],[58,12],[65,34],
+  [72,8],[79,26],[87,11],[94,36],
+  [9,48],[21,58],[35,51],[49,45],
+  [61,58],[75,48],[89,59],[17,73],
+  [42,69],[68,72],[92,75]
+];
+
+starPositions.forEach(([x,y], i) => {
+  const star = document.createElement("span");
+  star.className = "star";
+  star.style.left = x + "%";
+  star.style.top = y + "%";
+  star.style.animationDelay = (i % 7) * .45 + "s";
+  stars.appendChild(star);
+});
+
+/* 임시 프로필 데이터 */
+const profiles = {
+  moon: {
+    title: "☾ 달빛",
+    name: "달빛",
+    sub: "THE MOON",
+    age: "30세",
+    job: "변호사",
+    hobby: "춤추기",
+    description: "오랜 시간 곁에 있었지만, 아직 보여주지 못한 모습이 많다.",
+    story: `여기에 달빛의 자세한 프로필과 이야기가 들어갈 예정입니다.
+
+하늘과 처음 만났던 시절.
+오랫동안 친구라는 이름으로 곁에 남았던 시간.
+그리고 말하지 못한 마음.
+
+우리가 함께 정리한 캐릭터 설정을 이곳에 넣으면 됩니다.`,
+    ending: "내가 너를 사랑해도 되는 걸까."
+  },
+
+  sun: {
+    title: "☼ 햇살",
+    name: "햇살",
+    sub: "THE SUN",
+    age: "30세",
+    job: "추후 입력",
+    hobby: "사진 찍기",
+    description: "함께한 시간을 사진으로 남기는 것을 좋아한다.",
+    story: `여기에 햇살의 자세한 프로필과 이야기가 들어갈 예정입니다.
+
+하늘과 함께 보낸 학창 시절.
+연인이 되고, 약혼하기까지 쌓아온 일상.
+그리고 지금껏 알지 못했던 자신의 마음.
+
+햇살의 독백과 상세 설정을 이곳에 넣으면 됩니다.`,
+    ending: "사랑해도 돼?"
+  }
+};
+
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[ch]);
+}
+
+function profileHTML(p) {
+  return `
+    <div class="profile-top">
+      <div class="portrait">이미지 영역</div>
+      <div>
+        <h2 class="profile-name">${escapeHTML(p.name)}</h2>
+        <div class="profile-sub">${escapeHTML(p.sub)}</div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>기본 정보</h3>
+      <div class="info-row">
+        <span class="info-label">나이</span>
+        <span>${escapeHTML(p.age)}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">직업</span>
+        <span>${escapeHTML(p.job)}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">취미</span>
+        <span>${escapeHTML(p.hobby)}</span>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>소개</h3>
+      <p>${escapeHTML(p.description)}</p>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <div class="profile-section">
+      <h3>그의 이야기</h3>
+      <p class="monologue">${escapeHTML(p.story)}</p>
+      <p class="monologue-end">${escapeHTML(p.ending)}</p>
+    </div>
+  `;
+}
+
+function openModal(type) {
+  previousFocus = document.activeElement;
+
+  if (type === "moon" || type === "sun") {
+    world.dataset.mode = type;
+    const p = profiles[type];
+    modal.dataset.person = type;
+    modalTitle.textContent = p.title + " · PROFILE";
+    content.innerHTML = profileHTML(p);
+  } else if (type === "cat") {
+    modal.dataset.person = "moon";
+    modalTitle.textContent = "✦ 벼리";
+    content.innerHTML = `
+      <div class="profile-section">
+        <h3>벼리</h3>
+        <p>달빛과 함께 사는 고양이.</p>
+        <p>이곳에는 벼리의 사진과 이야기가 들어갈 예정입니다.</p>
+      </div>
+    `;
+  } else if (type === "creator") {
+    modal.dataset.person = "sun";
+    modalTitle.textContent = "✿ 제작자 이야기";
+    content.innerHTML = `
+      <div class="profile-section">
+        <h3>작은 꽃을 발견하셨네요!</h3>
+        <p>이곳에는 제작자의 코멘트와 숨겨진 이야기가 들어갈 예정입니다.</p>
+      </div>
+    `;
+  }
+
+  content.scrollTop = 0;
+  layer.classList.add("open");
+  closeBtn.focus();
+}
+
+function closeModal() {
+  layer.classList.remove("open");
+  previousFocus?.focus();
+}
+
+document.getElementById("moonBtn")
+  .addEventListener("click", () => openModal("moon"));
+
+document.getElementById("sunBtn")
+  .addEventListener("click", () => openModal("sun"));
+
+document.getElementById("starBtn")
+  .addEventListener("click", () => openModal("cat"));
+
+document.getElementById("flowerBtn")
+  .addEventListener("click", () => openModal("creator"));
+
+closeBtn.addEventListener("click", closeModal);
+
+layer.addEventListener("click", e => {
+  if (e.target === layer) closeModal();
+});
+
+document.addEventListener("keydown", e => {
+  if (!layer.classList.contains("open")) return;
+
+  if (e.key === "Escape") {
+    closeModal();
+    return;
+  }
+
+  if (e.key === "Tab") {
+    const focusable = [...modal.querySelectorAll(
+      'button, a[href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    )].filter(el => !el.disabled);
+
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+});
+</script>
+</body>
+</html>
