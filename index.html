@@ -412,16 +412,18 @@ body {
 }
 
 .profile {
-  width: min(370px, 100%);
-  max-height: min(65svh, 540px);
+  width: min(310px, 100%);
+  max-height: min(54svh, 440px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.55);
   border-radius: 16px;
-  background: rgba(241,244,252,.92);
+  background: rgba(241,244,252,.58);
+  -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
   box-shadow: 0 18px 65px rgba(5,12,33,.3);
-  color: #39435c;
+  color: #000;
   transform: translateY(24px) scale(.975);
 }
 
@@ -431,8 +433,8 @@ body {
 }
 
 .profile.sun-theme {
-  background: rgba(255,251,241,.93);
-  color: #5c5044;
+  background: rgba(255,251,241,.58);
+  color: #000;
 }
 
 .profile-head {
