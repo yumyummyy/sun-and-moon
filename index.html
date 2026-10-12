@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 
 <style>
 * {
@@ -483,6 +483,137 @@ body {
   margin: 24px 0;
 }
 
+/* 프로필 카드 */
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.7;
+}
+
+.pc-box {
+  background: #fffdf8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 12px rgba(20,28,50,.1);
+}
+
+/* 벼리: 사진 영역 투명 */
+.pc-box.clear {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.pc-box.clear .pc-photo {
+  background: none;
+}
+
+.pc-story {
+  font-size: 13px;
+}
+
+.pc-top {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.pc-photo {
+  flex: 0 0 84px;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #dfe6f4, #c9d3e8);
+}
+
+.pc-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pc-info {
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.pc-name {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.3;
+}
+
+.pc-row {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.pc-k {
+  margin-right: 8px;
+  padding-right: 8px;
+  border-right: 1px solid rgba(0,0,0,.28);
+}
+
+.pc-eras {
+  margin: 0;
+}
+
+.pc-era {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pc-era dt {
+  flex: 0 0 58px;
+}
+
+.pc-era dd {
+  margin: 0;
+}
+
+.pc-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid rgba(0,0,0,.25);
+  border-radius: 10px;
+  background: #fffdf8;
+  box-shadow: 0 2px 12px rgba(20,28,50,.1);
+  color: #000;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.pc-link:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.pc-note {
+  padding: 6px 14px 8px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #fffef5 0 27px,
+    rgba(110,140,190,.4) 27px 28px
+  );
+  box-shadow: 0 2px 8px rgba(20,28,50,.14);
+  color: #000;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 23px;
+  line-height: 28px;
+  transform: rotate(-.8deg);
+}
+
 /* 모바일 */
 
 @media (max-width: 600px) {
@@ -607,7 +738,6 @@ body {
 
   <div class="heading">
     해와 달
-    <small>THE SUN AND THE MOON</small>
   </div>
 
   <!-- SVG 달 -->
@@ -918,6 +1048,89 @@ body {
 
   let previousFocus = null;
 
+  const PEOPLE = {
+    moon: {
+      name: '달빛',
+      job: '변호사',
+      hobby: '춤',
+      photo: '', // 2:3 비율 이미지 주소
+      eras: [
+        ['중학교', '짧은 설명이 들어갈 자리입니다.'],
+        ['고등학교', '짧은 설명이 들어갈 자리입니다.'],
+        ['대학교', '짧은 설명이 들어갈 자리입니다.']
+      ],
+      link: '#', // 링크 주소
+      thought: '내가 너를 사랑해도 되는 걸까.'
+    },
+    sun: {
+      name: '햇살',
+      job: '○○',
+      hobby: '사진',
+      photo: '',
+      eras: [
+        ['중학교', '짧은 설명이 들어갈 자리입니다.'],
+        ['고등학교', '짧은 설명이 들어갈 자리입니다.'],
+        ['대학교', '짧은 설명이 들어갈 자리입니다.']
+      ],
+      link: '#',
+      thought: '사랑해도 돼?'
+    },
+    cat: {
+      name: '벼리',
+      tagline: '달빛과 함께 사는 고양이.',
+      photo: '', // 배경이 투명한 이미지(png) 주소
+      clear: true,
+      story: '벼리의 이야기가 들어갈 자리입니다.'
+    }
+  };
+
+  function personHTML(p) {
+    const photo = p.photo
+      ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
+      : '';
+
+    const rows =
+      (p.tagline ? `<div class="pc-row">${p.tagline}</div>` : '') +
+      (p.job ? `<div class="pc-row"><span class="pc-k">직업</span>${p.job}</div>` : '') +
+      (p.hobby ? `<div class="pc-row"><span class="pc-k">최근 취미</span>${p.hobby}</div>` : '');
+
+    const eras = p.eras
+      ? '<dl class="pc-box pc-eras">' +
+        p.eras.map(([k, v]) =>
+          `<div class="pc-era"><dt>${k}</dt><dd>${v}</dd></div>`
+        ).join('') +
+        '</dl>'
+      : '';
+
+    const link = p.link
+      ? `<a class="pc-link" href="${p.link}" target="_blank" rel="noopener noreferrer">
+          <span>${p.name}에 대해 아는 사실들 (보러가기)</span>
+          <span aria-hidden="true">›</span>
+        </a>`
+      : '';
+
+    const note = p.thought
+      ? `<div class="pc-note">${p.thought}</div>`
+      : '';
+
+    const story = p.story
+      ? `<div class="pc-box pc-story">${p.story}</div>`
+      : '';
+
+    return `
+      <div class="profile-card">
+        <div class="pc-box pc-top${p.clear ? ' clear' : ''}">
+          <div class="pc-photo">${photo}</div>
+          <div class="pc-info">
+            <h2 class="pc-name">${p.name}</h2>
+            ${rows}
+          </div>
+        </div>
+        ${eras}${link}${note}${story}
+      </div>
+    `;
+  }
+
   function openProfile(type) {
     previousFocus = document.activeElement;
 
@@ -929,8 +1142,8 @@ body {
 
     const labels = {
       moon: '소꿉친구',
-      sun: '약혼자',
-      cat: '집고양이',
+      sun: '소꿉친구(약혼자)',
+      cat: '집고양이(길고양이 출신)',
       creator: '제작자 코멘트'
     };
 
@@ -944,12 +1157,7 @@ body {
 
     if (type === 'cat') {
 
-      body.innerHTML = `
-        <h2 id="profileName">✦ 벼리</h2>
-        <p>달빛과 함께 사는 고양이.</p>
-        <hr>
-        <p>벼리의 사진과 이야기가 들어갈 자리입니다.</p>
-      `;
+      body.innerHTML = personHTML(PEOPLE.cat);
 
     } else if (type === 'creator') {
 
@@ -959,34 +1167,9 @@ body {
         <p>제작 비하인드와 소소한 이야기가 들어갈 자리입니다.</p>
       `;
 
-    } else if (isMoon) {
-
-      body.innerHTML = `
-        <h2 id="profileName">달빛</h2>
-        <p>오랫동안 하늘의 곁에 머물렀던 사람.</p>
-        <hr>
-        <p>나이　30세</p>
-        <p>직업　변호사</p>
-        <p>취미　춤</p>
-        <hr>
-        <p>상세 프로필이 들어갈 자리입니다.</p>
-        <hr>
-        <p>내가 너를 사랑해도 되는 걸까.</p>
-      `;
-
     } else {
 
-      body.innerHTML = `
-        <h2 id="profileName">햇살</h2>
-        <p>하늘과 함께한 시간을 사진으로 남기는 사람.</p>
-        <hr>
-        <p>나이　30세</p>
-        <p>취미　사진</p>
-        <hr>
-        <p>상세 프로필이 들어갈 자리입니다.</p>
-        <hr>
-        <p>사랑해도 돼?</p>
-      `;
+      body.innerHTML = personHTML(PEOPLE[type]);
     }
 
     body.scrollTop = 0;
