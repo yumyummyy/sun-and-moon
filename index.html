@@ -517,7 +517,7 @@ body {
 .pc-top {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .pc-photo {
@@ -537,7 +537,6 @@ body {
 
 .pc-info {
   min-width: 0;
-  padding-top: 4px;
 }
 
 .pc-name {
@@ -545,6 +544,28 @@ body {
   font-size: 22px;
   font-weight: 300;
   line-height: 1.3;
+}
+
+.pc-age {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.pc-trait {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.14);
+  font-size: 13px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.pc-tl {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  letter-spacing: .15em;
 }
 
 .pc-row {
@@ -598,20 +619,32 @@ body {
   outline-offset: 2px;
 }
 
+.pc-note-wrap {
+  filter: drop-shadow(0 2px 4px rgba(20,28,50,.2));
+  transform: rotate(-.8deg);
+}
+
 .pc-note {
-  padding: 6px 14px 8px;
+  padding: 6px 24px 8px 14px;
   border-radius: 3px;
   background: repeating-linear-gradient(
     to bottom,
     #fffef5 0 27px,
     rgba(110,140,190,.4) 27px 28px
   );
-  box-shadow: 0 2px 8px rgba(20,28,50,.14);
   color: #000;
   font-family: 'Nanum Pen Script', cursive;
   font-size: 23px;
   line-height: 28px;
-  transform: rotate(-.8deg);
+  white-space: pre-wrap;
+
+  /* 오른쪽 가장자리의 뜯긴 반원 구멍 */
+  -webkit-mask-image: radial-gradient(circle 6px at 100% 50%, transparent 5.5px, #000 6px);
+          mask-image: radial-gradient(circle 6px at 100% 50%, transparent 5.5px, #000 6px);
+  -webkit-mask-size: 100% 28px;
+          mask-size: 100% 28px;
+  -webkit-mask-repeat: repeat-y;
+          mask-repeat: repeat-y;
 }
 
 /* 모바일 */
@@ -1048,39 +1081,63 @@ body {
 
   let previousFocus = null;
 
+  const CREATOR_LINK = '#'; // 제작 TMI 링크 주소
+
   const PEOPLE = {
     moon: {
       name: '달빛',
+      age: '33세',
+      height: '188cm',
       job: '변호사',
       hobby: '춤',
       photo: '', // 2:3 비율 이미지 주소
+      personality: '성격 설명이 들어갈 자리입니다.',
       eras: [
         ['중학교', '짧은 설명이 들어갈 자리입니다.'],
         ['고등학교', '짧은 설명이 들어갈 자리입니다.'],
         ['대학교', '짧은 설명이 들어갈 자리입니다.']
       ],
       link: '#', // 링크 주소
-      thought: '내가 너를 사랑해도 되는 걸까.'
+      thought: [
+        '또 아무 말도 못 했다. 오늘도 네 얼굴을 보고 나서야 알았다. 하루 종일 무슨 생각을 하든 결국 끝에는 네가 있다는 걸.',
+        '내가 너를 사랑해도 되는 걸까. 이 질문을 몇 년째 하고 있는지 모르겠다. 법정에서는 이렇게 오래 망설인 적이 없는데. 증거도 논리도 다 있는데, 너 앞에서는 한 문장도 제대로 세우지 못한다.',
+        '어릴 때부터 곁에 있었다는 게 이렇게 발목을 잡을 줄은 몰랐다. 소꿉친구라는 이름은 편하지만 그만큼 단단해서, 한 번 넘으면 다시는 돌아갈 수 없을 것 같다.',
+        '춤을 추면 잠깐은 잊는다. 몸이 먼저 움직이니까, 생각할 틈이 없으니까. 근데 음악이 끝나고 숨이 가라앉으면 그 자리에 또 네가 서 있다.',
+        '네가 웃을 때마다 나는 조금씩 비겁해진다. 모른 척하고, 괜찮은 척하고, 좋은 친구인 척하고. 그게 제일 안전하다는 걸 알아서.',
+        '그래도 하나만 적어둘게. 네가 행복했으면 좋겠다는 마음은 거짓이 아니야. 그 행복 옆에 내가 없더라도. ...없더라도, 라고 쓰는 게 아직도 이렇게 아프지만.',
+        '언젠가 이 노트를 네가 보게 된다면 그땐 변명하지 않을게. 내가 너를 사랑해도 되는 걸까. 그 답을 네 입으로 듣고 싶어서 아직도 여기 있는 거니까.'
+      ].join('\n\n')
     },
     sun: {
       name: '햇살',
+      age: '33세',
+      height: '190cm',
       job: '○○',
       hobby: '사진',
       photo: '',
+      personality: '성격 설명이 들어갈 자리입니다.',
       eras: [
         ['중학교', '짧은 설명이 들어갈 자리입니다.'],
         ['고등학교', '짧은 설명이 들어갈 자리입니다.'],
         ['대학교', '짧은 설명이 들어갈 자리입니다.']
       ],
       link: '#',
-      thought: '사랑해도 돼?'
+      thought: [
+        '사진을 정리하다가 또 멈췄다. 어느 폴더를 열어도 네가 있다. 일부러 찍은 게 아닌 것도 많은데, 돌아보면 전부 너를 향해 있었다.',
+        '사랑해도 돼? 이 말을 몇 번이나 입안에서 굴렸는지 모르겠다. 약혼이라는 말이 생겼는데도 이상하게 이 질문은 없어지지 않는다. 이름이 붙는다고 마음까지 허락받은 건 아니니까.',
+        '너는 늘 괜찮다고 말하지. 근데 나는 그 괜찮다는 말 뒤에 뭐가 있는지 알고 싶어. 카메라는 앞에 있는 것밖에 못 찍지만, 나는 네 뒤쪽이 궁금해.',
+        '같이 보낸 시간이 너무 길어서 처음 좋아하게 된 순간이 언제인지도 기억이 안 나. 아침 햇빛처럼 어느새 번져 있었던 것 같아. 눈치챘을 땐 이미 방 안이 환했고, 되돌릴 수 없었어.',
+        '무서운 건 거절이 아니야. 네가 나 때문에 억지로 웃는 거. 네 선택이 내 기대에 눌리는 거. 그래서 자꾸 묻는 거야. 사랑해도 되는지. 네가 아니라고 하면 그 대답까지 사진처럼 오래 간직할 테니까.',
+        '그래도 이것만은 알아줘. 나는 네 곁에서 가장 좋은 빛을 기다리는 사람이야. 흐린 날에도, 늦은 저녁에도. 네가 고개를 돌려 나를 볼 때까지 셔터는 누르지 않고 기다릴게.',
+        '사랑해도 돼?'
+      ].join('\n\n')
     },
     cat: {
       name: '벼리',
+      age: '7세',
       tagline: '달빛과 함께 사는 고양이.',
       photo: '', // 배경이 투명한 이미지(png) 주소
-      clear: true,
-      story: '벼리의 이야기가 들어갈 자리입니다.'
+      clear: true
     }
   };
 
@@ -1091,8 +1148,13 @@ body {
 
     const rows =
       (p.tagline ? `<div class="pc-row">${p.tagline}</div>` : '') +
+      (p.height ? `<div class="pc-row"><span class="pc-k">키</span>${p.height}</div>` : '') +
       (p.job ? `<div class="pc-row"><span class="pc-k">직업</span>${p.job}</div>` : '') +
       (p.hobby ? `<div class="pc-row"><span class="pc-k">최근 취미</span>${p.hobby}</div>` : '');
+
+    const trait = p.personality
+      ? `<div class="pc-trait"><span class="pc-tl">성격</span>${p.personality}</div>`
+      : '';
 
     const eras = p.eras
       ? '<dl class="pc-box pc-eras">' +
@@ -1110,23 +1172,22 @@ body {
       : '';
 
     const note = p.thought
-      ? `<div class="pc-note">${p.thought}</div>`
-      : '';
-
-    const story = p.story
-      ? `<div class="pc-box pc-story">${p.story}</div>`
+      ? `<div class="pc-note-wrap"><div class="pc-note">${p.thought}</div></div>`
       : '';
 
     return `
       <div class="profile-card">
-        <div class="pc-box pc-top${p.clear ? ' clear' : ''}">
-          <div class="pc-photo">${photo}</div>
-          <div class="pc-info">
-            <h2 class="pc-name">${p.name}</h2>
-            ${rows}
+        <div class="pc-box${p.clear ? ' clear' : ''}">
+          <div class="pc-top">
+            <div class="pc-photo">${photo}</div>
+            <div class="pc-info">
+              <h2 class="pc-name">${p.name}<span class="pc-age">${p.age}</span></h2>
+              ${rows}
+            </div>
           </div>
+          ${trait}
         </div>
-        ${eras}${link}${note}${story}
+        ${eras}${link}${note}
       </div>
     `;
   }
@@ -1162,9 +1223,11 @@ body {
     } else if (type === 'creator') {
 
       body.innerHTML = `
-        <p>작은 데이지를 발견하셨네요.</p>
-        <hr>
-        <p>제작 비하인드와 소소한 이야기가 들어갈 자리입니다.</p>
+        <p>발견하셨군요!</p>
+        <a class="pc-link" href="${CREATOR_LINK}" target="_blank" rel="noopener noreferrer">
+          <span>제작 TMI 보기 (안보셔도 괜찮아요!)</span>
+          <span aria-hidden="true">›</span>
+        </a>
       `;
 
     } else {
